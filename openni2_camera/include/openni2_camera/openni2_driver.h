@@ -54,6 +54,8 @@
 #include "openni2_camera/GetSerial.h"
 
 #include <ros/ros.h>
+#include <std_srvs/SetBool.h>
+
 
 namespace openni2_wrapper
 {
@@ -92,6 +94,7 @@ private:
   void irConnectCb();
 
   bool getSerialCb(openni2_camera::GetSerialRequest& req, openni2_camera::GetSerialResponse& res);
+  bool getRgbCallback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
 
   void configCb(Config &config, uint32_t level);
 
@@ -125,6 +128,7 @@ private:
 
   /** \brief get_serial server*/
   ros::ServiceServer get_serial_server;
+  ros::ServiceServer get_rgb_server_;
 
   /** \brief reconfigure server*/
   boost::shared_ptr<ReconfigureServer> reconfigure_server_;
@@ -186,6 +190,8 @@ private:
   bool projector_info_subscribers_;
 
   bool use_device_time_;
+
+  int requested_rgb_;
 
   Config old_config_;
 };

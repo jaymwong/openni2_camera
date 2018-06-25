@@ -56,6 +56,8 @@ OpenNI2Driver::OpenNI2Driver(ros::NodeHandle& n, ros::NodeHandle& pnh) :
     enable_reconnect_(false)
 {
 
+  requested_rgb_ = 0;
+
   genVideoModeTableMap();
 
   readConfigFromParameterServer();
@@ -152,8 +154,63 @@ void OpenNI2Driver::advertiseROSTopics()
   color_info_manager_ = boost::make_shared<camera_info_manager::CameraInfoManager>(color_nh, color_name, color_info_url_);
   ir_info_manager_  = boost::make_shared<camera_info_manager::CameraInfoManager>(ir_nh,  ir_name,  ir_info_url_);
 
-  get_serial_server = nh_.advertiseService("get_serial", &OpenNI2Driver::getSerialCb,this);
+  get_serial_server = nh_.advertiseService("get_serial", &OpenNI2Driver::getSerialCb, this);
+  get_rgb_server_ = nh_.advertiseService("get_rgb", &OpenNI2Driver::getRgbCallback, this);
 
+}
+
+bool OpenNI2Driver::getRgbCallback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res) {
+  if (req.data){
+    requested_rgb_ = 1;
+    ROS_INFO("Service > RGB ON");
+  }
+  else {
+    requested_rgb_ = 0;
+    ROS_INFO("Service > RGB OFF");
+  }
+
+  if (requested_rgb_ && !device_->isColorStreamStarted())
+  {
+    // Can't stream IR and RGB at the same time. Give RGB preference.
+    if (device_->isIRStreamStarted())
+    {
+      ROS_ERROR("Cannot stream RGB and IR at the same time. Streaming RGB only.");
+      ROS_INFO("Stopping IR stream.");
+      device_->stopIRStream();
+    }
+
+    device_->setColorFrameCallback(boost::bind(&OpenNI2Driver::newColorFrameCallback, this, _1));
+
+    ROS_INFO("Starting color stream.");
+    device_->startColorStream();
+
+    // Workaound for https://github.com/ros-drivers/openni2_camera/issues/51
+    if( exposure_ != 0 )
+    {
+      ROS_INFO_STREAM("Exposure is set to " << exposure_ << ", forcing on color stream start");
+        //delay for stream to start, before setting exposure
+      boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+      forceSetExposure();
+    }
+
+  }
+  else if (!requested_rgb_ && device_->isColorStreamStarted())
+  {
+    ROS_INFO("Stopping color stream.");
+    device_->stopColorStream();
+
+    // Start IR if it's been blocked on RGB subscribers
+    bool need_ir = pub_ir_.getNumSubscribers() > 0;
+    if (need_ir && !device_->isIRStreamStarted())
+    {
+      device_->setIRFrameCallback(boost::bind(&OpenNI2Driver::newIRFrameCallback, this, _1));
+
+      ROS_INFO("Starting IR stream.");
+      device_->startIRStream();
+    }
+  }
+
+  return true;
 }
 
 bool OpenNI2Driver::getSerialCb(openni2_camera::GetSerialRequest& req, openni2_camera::GetSerialResponse& res) {
@@ -375,7 +432,7 @@ void OpenNI2Driver::colorConnectCb()
   }
   boost::lock_guard<boost::mutex> lock(connect_mutex_);
 
-  color_subscribers_ = pub_color_.getNumSubscribers() > 0;
+  color_subscribers_ = requested_rgb_; //pub_color_.getNumSubscribers() > 0;
 
   if (color_subscribers_ && !device_->isColorStreamStarted())
   {

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(openni2_camera)
 
-find_package(catkin REQUIRED camera_info_manager dynamic_reconfigure image_transport  nodelet sensor_msgs roscpp message_generation)
+find_package(catkin REQUIRED camera_info_manager dynamic_reconfigure image_transport std_srvs nodelet sensor_msgs roscpp message_generation)
 
 find_package(Boost REQUIRED COMPONENTS system thread)
 
@@ -24,8 +24,8 @@ catkin_package(
   DEPENDS libopenni2
 )
 
-include_directories(include 
-                    ${catkin_INCLUDE_DIRS} 
+include_directories(include
+                    ${catkin_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${PC_OPENNI2_INCLUDE_DIRS}
                     )
@@ -34,9 +34,9 @@ link_directories(${PC_OPENNI2_LIBRARY_DIRS})
 
 add_library(openni2_wrapper
    src/openni2_convert.cpp
-   src/openni2_device.cpp 
-   src/openni2_device_info.cpp 
-   src/openni2_timer_filter.cpp 
+   src/openni2_device.cpp
+   src/openni2_device_info.cpp
+   src/openni2_timer_filter.cpp
    src/openni2_frame_listener.cpp
    src/openni2_device_manager.cpp
    src/openni2_exception.cpp
@@ -89,6 +89,3 @@ install(DIRECTORY include/${PROJECT_NAME}/
 install(FILES openni2_nodelets.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
-
-
-
