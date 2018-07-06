@@ -162,6 +162,7 @@ void OpenNI2Driver::advertiseROSTopics()
 bool OpenNI2Driver::getRgbCallback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res) {
   if (req.data){
     requested_rgb_ = 1;
+    color_subscribers_ = 1;
     ROS_INFO("Service > RGB ON");
   }
   else {
@@ -199,9 +200,7 @@ bool OpenNI2Driver::getRgbCallback(std_srvs::SetBool::Request& req, std_srvs::Se
     ROS_INFO("Stopping color stream.");
     device_->stopColorStream();
 
-    // Start IR if it's been blocked on RGB subscribers
-    bool need_ir = pub_ir_.getNumSubscribers() > 0;
-    if (need_ir && !device_->isIRStreamStarted())
+    if (!device_->isIRStreamStarted())
     {
       device_->setIRFrameCallback(boost::bind(&OpenNI2Driver::newIRFrameCallback, this, _1));
 
@@ -464,9 +463,7 @@ void OpenNI2Driver::colorConnectCb()
     ROS_INFO("Stopping color stream.");
     device_->stopColorStream();
 
-    // Start IR if it's been blocked on RGB subscribers
-    bool need_ir = pub_ir_.getNumSubscribers() > 0;
-    if (need_ir && !device_->isIRStreamStarted())
+    if (!device_->isIRStreamStarted())
     {
       device_->setIRFrameCallback(boost::bind(&OpenNI2Driver::newIRFrameCallback, this, _1));
 
