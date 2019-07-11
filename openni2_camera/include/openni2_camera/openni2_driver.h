@@ -95,6 +95,7 @@ private:
 
   bool getSerialCb(openni2_camera::GetSerialRequest& req, openni2_camera::GetSerialResponse& res);
   bool getRgbCallback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
+  bool setAutoExposureAndWhiteBalanceCb(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
 
   void configCb(Config &config, uint32_t level);
 
@@ -129,6 +130,7 @@ private:
   /** \brief get_serial server*/
   ros::ServiceServer get_serial_server;
   ros::ServiceServer get_rgb_server_;
+  ros::ServiceServer set_auto_exp_server_;
 
   /** \brief reconfigure server*/
   boost::shared_ptr<ReconfigureServer> reconfigure_server_;

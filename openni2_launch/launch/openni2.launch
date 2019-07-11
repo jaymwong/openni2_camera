@@ -23,8 +23,8 @@
 
   <!-- Driver parameters -->
   <arg name="color_depth_synchronization"     default="false" />
-  <arg name="auto_exposure"                   default="true" />
-  <arg name="auto_white_balance"              default="true" />
+  <arg name="auto_exposure"                   default="false" />
+  <arg name="auto_white_balance"              default="false" />
 
   <!-- Arguments for remapping all device namespaces -->
   <arg name="rgb"              default="rgb" />
@@ -57,7 +57,7 @@
 
   <!-- Push down all topics/nodelets into "camera" namespace -->
   <group ns="$(arg camera)">
-  
+
 	  <!-- Start nodelet manager -->
 	  <arg name="manager" value="$(arg camera)_nodelet_manager" />
 	  <arg name="debug" default="false" /> <!-- Run manager in GDB? -->

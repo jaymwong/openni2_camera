@@ -156,8 +156,16 @@ void OpenNI2Driver::advertiseROSTopics()
 
   get_serial_server = nh_.advertiseService("get_serial", &OpenNI2Driver::getSerialCb, this);
   get_rgb_server_ = nh_.advertiseService("get_rgb", &OpenNI2Driver::getRgbCallback, this);
+  set_auto_exp_server_ = nh_.advertiseService("set_exposure", &OpenNI2Driver::setAutoExposureAndWhiteBalanceCb, this);
 
 }
+bool OpenNI2Driver::setAutoExposureAndWhiteBalanceCb(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res){
+  device_->setAutoExposure(req.data);
+  device_->setAutoWhiteBalance(req.data);
+  ROS_WARN("Setting auto exposure and white balance!");
+  return true;
+}
+
 
 bool OpenNI2Driver::getRgbCallback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res) {
   if (req.data){
