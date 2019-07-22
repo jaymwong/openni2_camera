@@ -774,7 +774,8 @@ void OpenNI2Driver::readConfigFromParameterServer()
   pnh_.param("rgb_camera_info_url", color_info_url_, std::string());
   pnh_.param("depth_camera_info_url", ir_info_url_, std::string());
 
-  pnh_.param("enable_reconnect", enable_reconnect_, true);
+  // pnh_.param("enable_reconnect", enable_reconnect_, true);
+  enable_reconnect_ = false;
 
 }
 
